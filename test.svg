@@ -1,0 +1,37 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+ width="200" height="200" viewBox="-100 -100 200 200" onload="init(evt)" onclick="togglePause(evt)">
+ <title>SVG animation using ECMAScript</title>
+ <script type="text/ecmascript">
+  var stop=true;
+  var intervalId;
+  var frameId = -1;
+  var totalDuration = 1000;
+  var totalFrame = totalDuration/16;
+  var object;
+  
+  function init(evt) {
+   object = evt.target.ownerDocument.getElementById('rot');
+   
+   togglePause(evt);
+  }
+  
+  function animate() {
+     if(++frameId>totalFrame) frameId=0;
+	 object.setAttribute('r',100.0*frameId/totalFrame);
+     //object.setAttribute('transform', 'rotate(' + degrees + ')');
+    }
+  
+  function togglePause(evt) {
+   if(stop) {
+    stop=false;
+	intervalId=setInterval(animate, 16);
+   } else {
+    stop=true;
+	clearInterval(intervalId);
+   }
+  }
+ </script>
+ <circle id="rot" cx="0" cy="0" r="0" stroke="green" fill="none"/>
+ <line x1="-100" y1="-100" x2="100" y2="100" stroke="red" visibility="hidden"/>
+</svg>
