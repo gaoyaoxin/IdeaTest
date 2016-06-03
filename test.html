@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body id="body">
+
+<p>Test</p>
+<svg width="500" height="500" viewBox="-250 -250 500 500">
+    <circle id="p" cx="-100" cy="0" r="2.5" stroke="orange" fill="red"/>
+    <line x1="-200" y1="-200" x2="200" y2="200" stroke="red"/>
+</svg>
+</body>
+<script>
+var AnimationEngine = (function () {
+        //protect this pointer
+        var _this = this;
+
+        //private variable
+		var doc;
+        var sceneLinkedList = { head: null };
+		var frameId;
+		var stopped;
+		var resumeScene = {};
+		
+        var init = function () {
+			doc = document; //for later use
+			frameId = -1;			
+			stopped = true;
+			
+			document.getElementById("body").onclick = togglePause;
+			
+			addScene(new pointMoveScene("p", -100, 0, 100, 0, 100));
+			
+			resumeScene = sceneLinkedList.head;
+			togglePause();
+        }
+		
+		function addScene(scene) {
+			if(sceneLinkedList.head == null) {
+				sceneLinkedList.head = scene;
+				sceneLinkedList.head.next = scene;
+				sceneLinkedList.head.prev = scene;
+			} else {
+				var prv = sceneLinkedList.head.prev;
+				scene.next = prv.next;
+				scene.prev = prv;
+				prv.next = scene;
+				scene.next.prev = scene;
+			}
+		}
+		
+		function togglePause()
+		{
+			if(stopped) {
+				stopped = false;
+				requestAnimationFrame(resumeScene.animate);
+				resumeScene = null;
+			} else {
+				stopped = true;
+			}
+		}
+		
+		var pointMoveScene = function (elemId, x0, y0, x1, y1, frame ) {
+			var _this = this;
+			
+			var elem;
+			var xt = [], yt = [];
+			
+			var init = function() {
+				elem = doc.getElementById(elemId);
+				if(elem.nodeName != "circle") elem = null;
+				
+				if(elem != null) {
+					for(var i=0; i<frame; i++) {
+						xt.push(x0+i/(frame-1)*(x1-x0));
+						yt.push(y0+i/(frame-1)*(y1-y0));
+					}
+					
+					_this.next = null;
+					_this.prev = null;
+					
+					addScene(_this);
+				}
+			}
+			
+			_this.animate = function() {
+				if(stopped) {
+					resumeScene = _this;
+				} else {
+					if(++frameId >= frame) {
+						frameId = -1;
+						requestAnimationFrame(_this.next.animate);
+					} else {
+						elem.setAttribute("cx", xt[frameId]);
+						elem.setAttribute("cy", yt[frameId]);
+						requestAnimationFrame(_this.animate);
+					}					
+				}
+			}
+			
+			init();
+		}
+		
+        init();
+    }());
+</script>
+</html>
